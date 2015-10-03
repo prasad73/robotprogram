@@ -1,0 +1,666 @@
+#include <Servo.h>
+#include <EEPROM.h>
+Servo necktiltservo;
+Servo palmservo;
+boolean rhup;
+boolean rhdown;
+boolean lhup;
+boolean lhdown;
+boolean lelup;
+boolean leldown;
+boolean relup;
+boolean reldown;
+boolean sit;
+boolean stand = false;
+boolean bgreet = false;
+int RH_DIR = 24;
+int REL_DIR = 25;
+int NTILT_DIR = 26;
+int NROT_DIR = 26;
+int HAT_DIR = 27;
+int BEND_DIR = 28;
+int SITSTAND_DIR = 29;
+int startsensor = 30;
+int stopbutton = 31;
+int rhuplimit;
+int reluplimit;
+int sitlimit;
+int hatdownlimit;
+int hatuplimit;
+int neckrightlimit;
+int neckleftlimit;  
+int standlimit;
+int rhupsensor = 32;
+int relupsensor = 33;
+int sitsensor = 34;
+int standsensor = 39;
+int unostart = 35;
+int hatupsensor = 36;
+int neckrightsensor = 37;
+int neckleftsensor = 38;
+
+
+
+
+int RH_PWM = 2;
+int REL_PWM = 3;
+int NTILT_PWM = 4;
+int NROT_PWM = 4;
+int HAT_PWM = 5;
+int BEND_PWM = 6;
+int SITSTAND_PWM = 7;
+int NECKTILT_PWM =11;
+//int RIGHTPALM_PWM = 11;
+int NECKROT_PWM = 9;
+unsigned int getuptime;
+unsigned int sitdowntime;
+unsigned int rhuptime;
+unsigned int rhdowntime;
+unsigned int reluptime;
+unsigned int reldowntime;
+unsigned int rhupmem = rhuptime/20;
+unsigned char s;
+
+void setup()
+{
+pinMode(RH_DIR,OUTPUT);
+pinMode(REL_DIR,OUTPUT);
+//pinMode(NTILT_DIR,OUTPUT);
+pinMode(NROT_DIR,OUTPUT);
+pinMode(BEND_DIR,OUTPUT);
+pinMode(HAT_DIR,OUTPUT);
+pinMode(SITSTAND_DIR,OUTPUT);
+pinMode(startsensor,INPUT_PULLUP);
+pinMode(stopbutton,INPUT_PULLUP);
+pinMode(rhupsensor,INPUT_PULLUP);
+pinMode(relupsensor,INPUT_PULLUP);
+pinMode(sitsensor,INPUT_PULLUP);
+pinMode(unostart,OUTPUT);
+pinMode(hatupsensor,INPUT_PULLUP);
+pinMode(neckrightsensor,INPUT_PULLUP);
+pinMode(neckleftsensor,INPUT_PULLUP);
+pinMode(standsensor,INPUT_PULLUP);
+
+palmservo.attach(11);
+palmservo.write(0);
+
+
+Serial.begin(9600);
+//necktiltservo.attach(NECKTILT_PWM);
+}
+
+void loop()
+{
+int startout = digitalRead(startsensor);
+int button2 = digitalRead(stopbutton);
+rhuplimit = digitalRead(rhupsensor);
+reluplimit = digitalRead(relupsensor);
+sitlimit = digitalRead(sitsensor);
+//hatdownlimit = digitalRead(hatdownsensor);
+//hatuplimit = digitalRead(hatupsensor);
+neckrightlimit = digitalRead(neckrightsensor);
+standlimit = digitalRead(standsensor);
+
+// Serial.println(sitlimit);
+Serial.println(standlimit);
+
+
+
+checkrhup();
+checkhatdown();
+checkneckright();
+//checkstand();
+ //bgreet=true;
+ 
+ if (stand == true && bgreet == false)
+ 
+ {
+ 
+ delay(10000);
+ greet();
+ 
+ }
+ if (Serial.available()>0)
+ 
+ {
+   
+   s = Serial.read();
+ switch(s)
+ {
+ case 'r':
+ RH_UP();
+ break;
+ case 'l':
+ RH_DOWN();
+ break;
+   case 'u':
+   upcycle();
+   break;
+   case 'd':
+   downcycle();
+   break;
+   case 'b':
+   BEND_DOWN();
+   break;
+   case 'c':
+   BEND_UP();
+    break;
+    case 'e':
+    REL_UP();
+    break;
+    case 'f':
+    REL_DOWN();
+    break;      
+    case 'n':
+    NECK_LEFT();
+    break;
+    case 'h':
+    HAT_UP();
+    break;
+    case 'i':
+    HAT_DOWN();
+    break;
+    case 'm':
+    NECK_RIGHT();
+    break;
+    case 'g':
+    greet();
+    break;
+    
+ }
+ 
+ 
+ }
+ 
+ if (startout == LOW)
+ {
+   
+unsigned long start = millis();
+unsigned long time = millis()-start;
+unsigned long t;
+upcycle();
+
+//REL_UP();
+//delay(1000);
+
+//downcycle();
+//BEND_DOWN();
+//NECK_LEFT();
+//NECK_RIGHT();
+//NECK_LEFT2();
+
+
+ 
+
+ }
+
+
+//if (button2==LOW)
+//{
+//SITSTAND_STOP();
+//RH_STOP();
+//REL_STOP();
+//NECK_STOP();
+//BEND_STOP();
+//HAT_STOP();
+//}
+
+
+
+
+
+
+}
+
+void checkstand()
+{
+
+if (standlimit == LOW)
+{
+stand = true;
+
+}
+
+
+
+}
+
+
+void checkrhup()
+{
+
+if (rhuplimit == LOW)
+{
+analogWrite(RH_PWM,0);
+rhup = true;
+
+}
+
+
+
+}
+
+
+
+
+void checkrelup()
+{
+
+if(reluplimit == LOW)
+{
+analogWrite(REL_PWM,0);
+relup = true;
+
+
+}
+
+}
+
+
+
+
+void checkhatdown()
+{
+
+if (hatdownlimit == LOW)
+{
+HAT_STOP();
+
+}
+}
+
+void checkneckright()
+{
+
+if (neckrightlimit == LOW)
+{
+NECK_STOP();
+
+}
+
+
+
+}
+
+void RH_UP()
+{
+
+//unsigned long start = millis(); 
+ 
+
+  
+digitalWrite(RH_DIR,HIGH);
+analogWrite(RH_PWM,90);
+//Serial.println("Hi");
+delay(3000);
+RH_STOP();
+//rhuptime += millis()-start;
+//rhdowntime =0;
+
+
+
+
+
+
+ 
+}
+
+void RH_DOWN()
+{
+  
+digitalWrite(RH_DIR,LOW);
+analogWrite(RH_PWM,50);
+//Serial.println("Hi");
+delay(2000);
+RH_STOP();
+//rhdowntime +=millis()-start;
+//rhuptime =0;
+//EEPROM.put(1,thdowntime);
+//rhdown = true;
+  
+}
+
+
+
+void RH_STOP()
+{
+  
+//analogWrite(RH_PWM,0);
+//digitalWrite(RH_DIR,HIGH);
+analogWrite(RH_PWM,0);
+//delay(1000);
+//analogWrite(RH_PWM,0);
+}
+
+void REL_UP()
+{
+  
+  
+digitalWrite(REL_DIR,HIGH);
+analogWrite(REL_PWM,60);
+//Serial.println("Hi");
+delay(2000);
+REL_STOP();
+//reluptime+=millis()-start;
+//reldowntime=0;
+//EEPROM.put(2,reluptime);
+  
+}
+
+void REL_DOWN()
+{
+   
+digitalWrite(REL_DIR,LOW);
+analogWrite(REL_PWM,50);
+//Serial.println("Hi");
+delay(1000);
+REL_STOP();
+//reldowntime+=millis()-start;
+reluptime =0;
+  
+}
+
+
+void REL_STOP()
+{
+analogWrite(REL_PWM,0);
+
+}
+
+void NECK_UP()
+{
+
+digitalWrite(NTILT_DIR,LOW);
+analogWrite(NTILT_PWM,40);
+delay(500);
+NECK_STOP();
+
+}
+
+void NECK_STOP()
+{
+
+analogWrite(NTILT_PWM,0);
+analogWrite(NROT_PWM,0);
+
+}
+
+void NECK_DOWN()
+{
+
+digitalWrite(NTILT_DIR,HIGH);
+analogWrite(NTILT_PWM,40);
+delay(500);
+NECK_STOP();
+
+}
+
+void NECK_RIGHT()
+{
+
+digitalWrite(NROT_DIR,HIGH);
+analogWrite(NROT_PWM,80);
+delay(4000);
+NECK_STOP();
+
+}
+
+void NECK_LEFT()
+{
+
+digitalWrite(NROT_DIR,LOW);
+analogWrite(NROT_PWM,90);
+delay(1000);
+NECK_STOP();
+
+}
+
+void NECK_LEFT2()
+{
+
+digitalWrite(NROT_DIR,LOW);
+analogWrite(NROT_PWM,80);
+delay(3900);
+NECK_STOP();
+
+}
+void BEND_DOWN()
+{
+
+digitalWrite(BEND_DIR,LOW);
+analogWrite(BEND_PWM,70);
+delay(1800);
+BEND_STOP();
+
+}
+
+void BEND_UP()
+{
+
+digitalWrite(BEND_DIR,HIGH);
+analogWrite(BEND_PWM,70);
+delay(2000);
+BEND_STOP();
+
+}
+
+
+void BEND_STOP()
+{
+analogWrite(BEND_PWM,0);
+
+}
+
+
+void SITSTAND_DOWN()
+{
+
+digitalWrite(SITSTAND_DIR,LOW);
+analogWrite(SITSTAND_PWM,40);
+delay(2000);
+BEND_STOP();
+
+}
+
+void SITSTAND_UP()
+{
+
+digitalWrite(SITSTAND_DIR,HIGH);
+analogWrite(SITSTAND_PWM,70);
+//delay(2000);
+//SITSTAND_STOP();
+
+}
+
+void SITSTAND_STOP()
+{
+analogWrite(SITSTAND_PWM,0);
+
+}
+
+
+
+
+
+
+void greet()
+{
+bgreet = true;  
+//NECK_RIGHT();
+//delay(1000);
+//NECK_LEFT2();
+BEND_DOWN();
+delay(1000);
+BEND_UP();
+delay(1000);
+RH_UP();
+REL_UP();
+//HAT_UP();
+//delay(1000);
+//HAT_DOWN();
+//digitalWrite(unostart,HIGH);
+//delay(8000);
+//digitalWrite(unostart,LOW);
+palmservo.write(180);
+delay(3000);
+palmservo.write(0);
+RH_DOWN();
+REL_DOWN();
+delay(2000);
+downcycle();
+
+  
+
+}
+
+
+
+void downcycle()
+{
+
+SITSTAND_DOWN();
+delay(5000);
+BEND_DOWN2();
+//BEND_DOWN();
+stand = false;
+bgreet=false;
+
+
+}
+
+void upcycle()
+
+{
+unsigned long start = millis();
+unsigned long time = millis()-start;
+SITSTAND_UP();
+delay(20000);
+BEND_UP2();
+BEND_UP3();
+stand = true;
+//BEND_DOWN();
+
+}
+
+void BEND_UP2()
+{
+digitalWrite(BEND_DIR,HIGH);
+analogWrite(BEND_PWM,70);
+delay(16000);
+BEND_STOP();
+
+
+}
+void BEND_UP3()
+{
+digitalWrite(BEND_DIR,HIGH);
+analogWrite(BEND_PWM,70);
+delay(2000);
+BEND_STOP();
+
+
+}
+
+
+
+
+
+void BEND_DOWN2()
+{
+digitalWrite(BEND_DIR,LOW);
+analogWrite(BEND_PWM,70);
+delay(20000);
+BEND_STOP();
+
+
+}
+
+
+void HAND_DOWN()
+
+{
+digitalWrite(REL_DIR,LOW);
+digitalWrite(RH_DIR,LOW);
+analogWrite(RH_PWM,70);
+analogWrite(REL_PWM,50);
+//Serial.println("Hi");
+delay(2500);
+RH_STOP();
+
+
+}
+
+
+
+void HAND_UP()
+
+{
+  
+  
+digitalWrite(REL_DIR,HIGH);
+digitalWrite(RH_DIR,HIGH);
+analogWrite(RH_PWM,50);
+analogWrite(REL_PWM,50);
+ delay(3000);
+ analogWrite(RH_PWM,0);
+analogWrite(REL_PWM,0);
+  
+  
+  
+
+
+}
+
+void HAT_UP()
+{
+
+digitalWrite(HAT_DIR,HIGH);
+//Serial.println("high");
+analogWrite(HAT_PWM,70);
+//analogWrite(REL_PWM,50);
+ delay(1900);
+ analogWrite(HAT_PWM,0);
+//analogWrite(HAT_PWM,0);
+
+
+}
+
+void HAT_DOWN()
+{
+
+digitalWrite(HAT_DIR,LOW);
+analogWrite(HAT_PWM,70);
+delay(1800);
+analogWrite(HAT_PWM,0);
+
+
+
+}
+
+
+void HAT_STOP()
+{
+
+analogWrite(HAT_PWM,0);
+
+}
+
+
+
+void HAT_MOVE()
+{
+
+HAT_UP();
+delay(500);
+HAT_DOWN();
+
+}
+
+
+void PALM_ROTATE()
+
+{
+
+palmservo.write(45);
+
+}
